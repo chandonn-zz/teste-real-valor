@@ -1,11 +1,17 @@
 import React, { Component }    from 'react';
 import { connect } 			   from 'react-redux';
+import { bindActionCreators }  from 'redux';
 import './styles/App.css';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import LoginForm 			   from './components/LoginForm.js';
 import SimulationForm 		   from './components/SimulationForm.js';
 import Chart 				   from './components/Chart';
 import logo 				   from './assets/logo.png';
+import Results				   from './components/Results';
+import {
+	getBitcoinData,
+	getTesouroData
+} 							   from './actions';
 
 class RealValorApp extends Component {
 	constructor() {
@@ -18,11 +24,13 @@ class RealValorApp extends Component {
 			chartData: {},
 			chartOptions: {},
 			graphType: 'line',
+			resultsData: false
 		}
 
-		this.startSimulation = this.startSimulation.bind(this)
+		this.startSimulation    = this.startSimulation.bind(this)
 		this.changeChartOptions = this.changeChartOptions.bind(this)
-		this.changeStats = this.changeStats.bind(this)
+		this.changeStats 		= this.changeStats.bind(this)
+		this.openResults 		= this.openResults.bind(this)
 	}
 
 	componentDidMount() {
@@ -37,11 +45,13 @@ class RealValorApp extends Component {
 			})
 		}
 		if (nextProps.bitcoinData !== this.props.bitcoinData) {
+			console.log(nextProps.bitcoinData)
 			this.setState({
 				chartData: nextProps.bitcoinData
 			})
 		}
 		if (nextProps.tesouroData !== this.props.tesouroData) {
+			console.log(nextProps.tesouroData)
 			this.setState({
 				chartData: nextProps.tesouroData
 			})
@@ -53,6 +63,10 @@ class RealValorApp extends Component {
 			logged: false,
 			simulating: true
 		})
+	}
+
+	openResults() {
+		this.setState({ resultsData: !this.state.resultsData })
 	}
 
 	changeChartOptions() {
@@ -76,21 +90,22 @@ class RealValorApp extends Component {
 	}
 
 	changeStats() {
-		var data = this.state.chartData
-		this.setState({
-			graphType: this.state.graphType === 'bar' ? 'line' : 'bar',
-			chartData: data
-		})
+		if (this.props.type === 'Bitcoin') {
+			this.props.getTesouroData(this.props.period, this.props.amount)
+		} else {
+			this.props.getBitcoinData(this.props.period, this.props.amount)
+		}
 	}
 
 	render() {
 
-		var subTitle
-		var loginForm
-		var presentation
-		var simulationForm
-		var simulationGraph
-		var button
+		var subTitle,
+			loginForm,
+			presentation,
+			simulationForm,
+			simulationGraph,
+			button,
+			resultsData
 
 		if ( this.state.mounted ) {
 			subTitle = 'Entre na sua conta e acompanhe seus investimentos'
@@ -104,8 +119,13 @@ class RealValorApp extends Component {
 		}
 
 		if ( this.state.simulating ) {
+			subTitle = 'Veja aqui os resultados de seus investimentos'
 			simulationGraph  = (<Chart type={this.state.graphType} data={this.state.chartData} options={this.state.chartOptions} height={350} width={700}/>)
-			button = <button className="button" onClick={this.changeStats}><span className="buttonText">Mudar tipo de gráfico</span></button>
+			button = <button className="button changeGraphButton" onClick={this.changeStats}><span className="buttonText">Mudar tipo de ativo</span></button>
+		}
+
+		if ( this.state.resultsData ) {
+			resultsData = (<Results />)
 		}
 
 		return (
@@ -143,10 +163,11 @@ class RealValorApp extends Component {
 						transitionEnterTimeout={500}
 						transitionLeaveTimeout={300}>
 
-						<div style={{backgroundColor: '#fff', padding: this.state.simulating ? '10px' : 0}}>
+						<div onClick={this.openResults} style={{backgroundColor: '#fff', padding: this.state.simulating ? '10px' : 0}}>
 							{simulationGraph}
 						</div>
 						{button}
+						{resultsData}
 
 					</ReactCSSTransitionGroup>
 				</div>
@@ -156,9 +177,15 @@ class RealValorApp extends Component {
 }
 
 const mapStateToProps = store => ({
+	type: store.Chart.type,
 	userName: store.User.userName,
+	amount: store.Chart.amount,
+	period: store.Chart.period,
 	bitcoinData: store.Chart.bitcoinData,
-	tesouroData: store.Chart.tesouroData
+	tesouroData: store.Chart.tesouroData,
 })
 
-export default connect(mapStateToProps)(RealValorApp);
+const mapDispatchToProps = (dispatch) =>
+	bindActionCreators({ getBitcoinData, getTesouroData }, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(RealValorApp);

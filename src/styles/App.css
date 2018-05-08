@@ -19,6 +19,24 @@
 	text-align: center;
 }
 
+.Results {
+	text-align: center;
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+.row {
+	justify-content: center;
+	display: flex;
+	background: #f57c00;
+}
+
+.row div {
+	padding: 10px;
+	margin: 5px;
+	float: right;
+}
+
 .mainTitle, .subTitle, .secondTitle, span, input::placeholder {
 	color: #FFF;
 	font-family: Helvetica;
@@ -112,6 +130,17 @@
 	border: 0;
 	outline: none;
 	cursor: pointer;
+}
+
+.changeGraphButton {
+	border: 1px solid white;
+	transition: background 0.1s ease;
+}
+
+.changeGraphButton:hover {
+	background: #f57c00;
+	border: 1px solid #f57c00;
+	transition: background 0.1s ease;
 }
 
 .buttonText {

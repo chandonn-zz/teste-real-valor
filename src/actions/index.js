@@ -36,6 +36,8 @@ export function calculateBitcoinData(period, amount, bitData, day) {
 	var totalInBitcoin;
 	totalInBitcoin = (1/bitData[Object.keys(bitData)[0]])*amount;
 
+	// A partir da resposta da API: (Object) 'AAAA-MM-DD': valor
+	// contruimos os vetores de valores e períodos
 	for (var property in bitData) {
 
 		if ( ! bitData.hasOwnProperty(property) || property.substr(8,9) !== day) {
@@ -62,9 +64,13 @@ export function calculateBitcoinData(period, amount, bitData, day) {
 
 	return {
 		type: DISPATCH_BITCOIN,
+		initialDate: dateRange[0],
+		finalDate: dateRange[dateRange.length - 1],
 		period: period,
 		amount: amount,
-		chartData: chartData
+		chartData: chartData,
+		total: (values[values.length - 1]).toFixed(2),
+		profit: (values[values.length - 1] - amount).toFixed(2)
 	}
 }
 
@@ -107,12 +113,15 @@ export function getTesouroData(period, amount) {
 		}]
 	}
 
-
 	return {
 		type: DISPATCH_TESOURO,
+		initialDate: dateRange[0],
+		finalDate: dateRange[dateRange.length - 1],
 		period: period,
 		amount: amount,
-		chartData: chartData
+		chartData: chartData,
+		total: (values[values.length - 1]).toFixed(2),
+		profit: (values[values.length - 1] - amount).toFixed(2)
 	}
 }
 
